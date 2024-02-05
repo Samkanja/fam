@@ -34,6 +34,25 @@ class Member:
 
     
 
+    def set_spouse(self, spouse):
+        if not isinstance(spouse, Member):
+            raise ValueError('Invalid value for spouse')
+        if self.gender == spouse.gender:
+            raise ValueError('ivnalid gender value for spouse,\
+                 spouse should be a different Gender.')
+        self.spouse = spouse
+
+    def add_child(self, child):
+        if not isinstance(child, Member):
+            raise ValueError('Invalid Value for child')
+        self.children.append(child)
+
+        
+    
+
+
+    
+
 
 
 
