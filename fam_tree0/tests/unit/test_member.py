@@ -88,3 +88,29 @@ class TestMember(TestCase):
 
         member.father.mother = grandmother
         self.assertEqual(member.get_paternal_grandmother(), grandmother)
+
+    def test_get_maternal_grandmother(self):
+        member = Member(9, "Newmember", "Male")
+        mother = Member(10, "Newmeber2", "Female")
+        grandmother = Member(11, "Newmember_grandmother", "Female")
+
+        self.assertEqual(member.get_maternal_grandmother(), None)
+
+        member.mother = mother
+        self.assertEqual(member.get_maternal_grandmother(), None)
+
+        member.mother.mother = grandmother
+        self.assertEqual(member.get_maternal_grandmother(), grandmother)
+
+    def test_get_spouse_mother(self):
+        member = Member(9, "Newmember", "Male")
+        spouse = Member(40, "newmember_spouse", "Female")
+        spouse_mother = Member(11, "spouse_mother", "Female")
+
+        self.assertEqual(member.get_spouse_mother(), None)
+
+        member.spouse = spouse
+        self.assertEqual(member.get_spouse_mother(), None)
+
+        member.spouse.mother = spouse_mother
+        self.assertEqual(member.get_spouse_mother(), spouse_mother)
