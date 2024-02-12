@@ -1,5 +1,27 @@
 from unittest import TestCase
+from unittest.mock import Mock, patch
 from src.member import Member, Gender
+
+
+def create_faker_members(
+    id=None,
+    name=None,
+    gender=None,
+    mother=None,
+    spouse=None,
+    father=None,
+    children=None,
+):
+
+    member = Mock()
+    member.id = id
+    member.name = name
+    member.gender = gender
+    member.spouse = spouse
+    member.mother = mother
+    member.father = father
+    member.children = children
+    return member
 
 
 class TestMember(TestCase):
@@ -114,3 +136,76 @@ class TestMember(TestCase):
 
         member.spouse.mother = spouse_mother
         self.assertEqual(member.get_spouse_mother(), spouse_mother)
+
+    @patch(
+        "src.member.Member.get_paternal_grandmother",
+        side_effect=[
+            None,
+            create_faker_members(),
+            create_faker_members(children=[Member(10, "Dad", "Male")]),
+            create_faker_members(
+                children=[Member(10, "Dad", "Male"), Member(23, "Uncle", "Male")]
+            ),
+            create_faker_members(
+                children=[
+                    Member(10, "Dad", "Male"),
+                    Member(23, "Uncle", "Male"),
+                    Member(23, "Aunt", "Female"),
+                ]
+            ),
+        ],
+    )
+    def test_get_paternal_aunt(self, mock_get_paternal_grandmother):
+        # check if get_paternal_grandmother has been replaced a mock
+        self.assertEqual(isinstance(self.member.get_paternal_grandmother, Mock), True)
+
+        # check for None Values
+        self.assertEqual(self.member.get_paternal_aunt(), [])
+        self.assertEqual(self.member.get_paternal_aunt(), [])
+        self.assertEqual(self.member.get_paternal_aunt(), [])
+        self.assertEqual(self.member.get_paternal_aunt(), [])
+
+        paternal_aunts = self.member.get_paternal_aunt()
+        self.assertEqual(len(paternal_aunts), 1)
+        self.assertEqual(paternal_aunts[0].name, "Aunt")
+        self.assertEqual(paternal_aunts[0].gender, Gender.female)
+
+        # check if mock_get_paternal_grandmother was called instead of self.member.get_paternal_grandmotherj
+        mock_get_paternal_grandmother.assert_called_with()
+
+    @patch(
+        "src.member.Member.get_paternal_grandmother",
+        side_effect=[
+            None,
+            create_faker_members(),
+            create_faker_members(children=[Member(10, "Dad", "Male")]),
+            create_faker_members(
+                children=[Member(10, "Dad", "Male"), Member(23, "Aunt", "Female")]
+            ),
+            create_faker_members(
+                children=[
+                    Member(10, "Dad", "Male"),
+                    Member(23, "Uncle", "Male"),
+                    Member(23, "Aunt", "Female"),
+                ]
+            ),
+        ],
+    )
+    def test_get_paternal_uncle(self, mock_get_paternal_grandmother):
+        self.member.father = Member(10, "Dad", "Male")
+        # check if get_paternal_grandmother has been replaced a mock
+        self.assertEqual(isinstance(self.member.get_paternal_grandmother, Mock), True)
+
+        # check for None Values
+        self.assertEqual(self.member.get_paternal_uncle(), [])
+        self.assertEqual(self.member.get_paternal_uncle(), [])
+        self.assertEqual(self.member.get_paternal_uncle(), [])
+        self.assertEqual(self.member.get_paternal_uncle(), [])
+
+        paternal_uncle = self.member.get_paternal_uncle()
+        self.assertEqual(len(paternal_uncle), 1)
+        self.assertEqual(paternal_uncle[0].name, "Uncle")
+        self.assertEqual(paternal_uncle[0].gender, Gender.male)
+
+        # check if mock_get_paternal_grandmother was called instead of self.member.get_paternal_grandmotherj
+        mock_get_paternal_grandmother.assert_called_with()
