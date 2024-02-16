@@ -159,4 +159,6 @@ class Member:
     def get_siblings(self):
         if not self.mother:
             return []
+        if not self.mother.children:
+            return []
         return list(filter(lambda x: x.name != self.name, self.mother.children))
